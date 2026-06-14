@@ -18,7 +18,7 @@ class DefaultWardrobe(db.Model):
     kategori = db.Column(db.String(20), nullable=False)
     style = db.Column(db.String(20), nullable=False)
     warna_grup = db.Column(db.String(20), nullable=False)
-    image_url = db.Column(db.String(255))
+    image_url = db.Column(db.Text, nullable=True)
 
 class PersonalWardrobe(db.Model):
     __tablename__ = 'personal_wardrobe'
@@ -29,4 +29,4 @@ class PersonalWardrobe(db.Model):
     kategori = db.Column(db.String(20), nullable=False)
     style = db.Column(db.String(20), nullable=False)
     warna_grup = db.Column(db.String(20), nullable=False)
-    image_path = db.Column(db.String(255))
+    image_path = db.Column(db.Text, nullable=True)
