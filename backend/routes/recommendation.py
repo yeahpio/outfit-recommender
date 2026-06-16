@@ -31,6 +31,20 @@ def generate_recommendation():
             'message': 'Source tidak valid'
         }), 400
     
+    valid_styles = ['casual', 'formal', 'sporty']
+
+    if style and style not in valid_styles:
+        return jsonify({
+            'message': 'Style tidak valid'
+        }), 400
+
+    valid_warna = ['neutral', 'warm', 'cool']
+
+    if warna_grup and warna_grup not in valid_warna:
+        return jsonify({
+            'message': 'Warna grup tidak valid'
+        }), 400
+    
     if source == 'default':
         clothes = DefaultWardrobe.query.all()
 
@@ -73,6 +87,10 @@ def generate_recommendation():
         bawahan = [item for item in bawahan if item.warna_grup == warna_grup]
         sepatu = [item for item in sepatu if item.warna_grup == warna_grup]
 
+    if not atasan or not bawahan or not sepatu:
+        return jsonify({
+            'message': 'Tidak ada kombinasi yang sesuai filter'
+        }), 400
 
     outfits = []
     for a in atasan:
