@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import DefaultWardrobe, PersonalWardrobe
 
 recommendation_bp = Blueprint(
@@ -16,9 +17,11 @@ def warna_valid(warna1, warna2, warna3):
     return True
 
 @recommendation_bp.route('/generate', methods=['POST'])
+@jwt_required()
 def generate_recommendation():
 
     data = request.get_json()
+    current_user_id = get_jwt_identity()
 
     source = data.get('source')
     style = data.get('style')
@@ -49,11 +52,15 @@ def generate_recommendation():
         clothes = DefaultWardrobe.query.all()
 
     elif source == 'personal':
-        clothes = PersonalWardrobe.query.all()
+        clothes = PersonalWardrobe.query.filter_by(
+            user_id=current_user_id
+        ).all()
 
     else:
         default_clothes = DefaultWardrobe.query.all()
-        personal_clothes = PersonalWardrobe.query.all()
+        personal_clothes = PersonalWardrobe.query.filter_by(
+            user_id=current_user_id
+        ).all()
 
         clothes = default_clothes + personal_clothes
 

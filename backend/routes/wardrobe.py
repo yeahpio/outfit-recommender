@@ -68,6 +68,19 @@ def add_personal_wardrobe():
         return jsonify({
             'message': 'nama pakaian, kategori, style, dan warna grup wajib diisi'
         }), 400
+    
+    valid_kategori = ['atasan', 'bawahan', 'sepatu']
+    valid_style = ['casual', 'formal', 'sporty']
+    valid_warna = ['neutral', 'warm', 'cool']
+
+    if kategori not in valid_kategori:
+        return jsonify({'message': 'kategori tidak valid'}), 400
+
+    if style not in valid_style:
+        return jsonify({'message': 'style tidak valid'}), 400
+
+    if warna_grup not in valid_warna:
+        return jsonify({'message': 'warna grup tidak valid'}), 400
 
     new_item = PersonalWardrobe(
         user_id=int(user_id),
@@ -94,48 +107,72 @@ def add_personal_wardrobe():
         }
     }), 201
 
-@wardrobe_bp.route('/personal/<int:id_personal>', methods=['PUT'])
-@jwt_required()
-def update_personal_wardrobe(id_personal):
-    user_id = get_jwt_identity()
-    data = request.get_json()
+    @wardrobe_bp.route('/personal/<int:id_personal>', methods=['PUT'])
+    @jwt_required()
+    def update_personal_wardrobe(id_personal):
+        user_id = get_jwt_identity()
+        data = request.get_json()
 
-    item = PersonalWardrobe.query.filter_by(
-        id_personal=id_personal,
-        user_id=int(user_id)
-    ).first()
+        item = PersonalWardrobe.query.filter_by(
+            id_personal=id_personal,
+            user_id=int(user_id)
+        ).first()
 
-    if not item:
-        return jsonify({'message': 'data personal wardrobe tidak ditemukan'}), 404
+        if not item:
+            return jsonify({'message': 'data personal wardrobe tidak ditemukan'}), 404
 
-    item.nama_pakaian = data.get('nama_pakaian')
-    item.kategori = data.get('kategori')
-    item.style = data.get('style')
-    item.warna_grup = data.get('warna_grup')
-    item.image_path = data.get('image_path')
+        nama_pakaian = data.get('nama_pakaian')
+        kategori = data.get('kategori')
+        style = data.get('style')
+        warna_grup = data.get('warna_grup')
+        image_path = data.get('image_path')
 
-    db.session.commit()
+        if not nama_pakaian or not kategori or not style or not warna_grup:
+            return jsonify({
+                'message': 'nama pakaian, kategori, style, dan warna grup wajib diisi'
+            }), 400
 
-    return jsonify({
-        'message': 'data personal wardrobe berhasil diperbarui'
-    }), 200
+        valid_kategori = ['atasan', 'bawahan', 'sepatu']
+        valid_style = ['casual', 'formal', 'sporty']
+        valid_warna = ['neutral', 'warm', 'cool']
 
-@wardrobe_bp.route('/personal/<int:id_personal>', methods=['DELETE'])
-@jwt_required()
-def delete_personal_wardrobe(id_personal):
-    user_id = get_jwt_identity()
+        if kategori not in valid_kategori:
+            return jsonify({'message': 'kategori tidak valid'}), 400
 
-    item = PersonalWardrobe.query.filter_by(
-        id_personal=id_personal,
-        user_id=int(user_id)
-    ).first()
+        if style not in valid_style:
+            return jsonify({'message': 'style tidak valid'}), 400
 
-    if not item:
-        return jsonify({'message': 'data personal wardrobe tidak ditemukan'}), 404
+        if warna_grup not in valid_warna:
+            return jsonify({'message': 'warna grup tidak valid'}), 400
 
-    db.session.delete(item)
-    db.session.commit()
+        item.nama_pakaian = nama_pakaian
+        item.kategori = kategori
+        item.style = style
+        item.warna_grup = warna_grup
+        item.image_path = image_path
 
-    return jsonify({
-        'message': 'data personal wardrobe berhasil dihapus'
-    }), 200
+        db.session.commit()
+
+        return jsonify({
+            'message': 'data personal wardrobe berhasil diperbarui'
+        }), 200
+
+    @wardrobe_bp.route('/personal/<int:id_personal>', methods=['DELETE'])
+    @jwt_required()
+    def delete_personal_wardrobe(id_personal):
+        user_id = get_jwt_identity()
+
+        item = PersonalWardrobe.query.filter_by(
+            id_personal=id_personal,
+            user_id=int(user_id)
+        ).first()
+
+        if not item:
+            return jsonify({'message': 'data personal wardrobe tidak ditemukan'}), 404
+
+        db.session.delete(item)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'data personal wardrobe berhasil dihapus'
+        }), 200
