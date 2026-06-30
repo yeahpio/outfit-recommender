@@ -1,0 +1,369 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colors */
+    --bg: #F7F4F0;
+    --white: #FFFFFF;
+    --cream: #FAF7F2;
+
+    --terra: #C4714A;
+    --terra-light: #F2E8E1;
+    --clay: #D4956A;
+    --brown: #7A5C44;
+    --brown-light: #EDE8E0;
+
+    --text-dark: #2C1A0E;
+    --text-mid: #7A6658;
+    --text-soft: #B0A090;
+
+    --border: #E8E0D6;
+
+    --danger: #C0392B;
+    --danger-light: #FDECEA;
+    --danger-border: #F5C6C2;
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Shadow */
+    --shadow-sm: 0 6px 20px rgba(44, 26, 14, 0.08);
+    --shadow-hover: 0 8px 24px rgba(196, 113, 74, 0.10);
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.page-title {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-dark);
+}
+
+.page-sub {
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.sec-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn-primary {
+    background: var(--terra);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--cream);
+}
+
+.btn-danger {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--danger);
+    background: transparent;
+    font-size: 13px;
+    color: var(--danger);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-danger:hover {
+    background: var(--danger-light);
+}
+
+/* ============================================
+   INPUTS / SELECTS
+   ============================================ */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 11px;
+    color: var(--text-soft);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.form-input,
+.form-select {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text-dark);
+    background: var(--cream);
+    outline: none;
+    font-family: inherit;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: var(--terra);
+}
+
+.form-input:disabled {
+    color: var(--text-soft);
+    cursor: not-allowed;
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B0A090' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+}
+
+.card-hover {
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card-hover:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   BADGES / TAGS
+   ============================================ */
+
+.badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.badge-terra {
+    background: var(--terra-light);
+    color: var(--terra);
+}
+
+.badge-brown {
+    background: var(--brown-light);
+    color: var(--brown);
+}
+
+.badge-clay {
+    background: #F0EAE3;
+    color: var(--clay);
+}
+
+/* ============================================
+   NAVBAR (shared across pages)
+   ============================================ */
+
+.navbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    height: 64px;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.nav-brand {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+.nav-links {
+    display: flex;
+    gap: 36px;
+}
+
+.nav-links a {
+    font-size: 13px;
+    color: var(--text-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--terra);
+}
+
+.nav-links a.active {
+    color: var(--terra);
+    font-weight: 500;
+}
+
+.nav-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--terra-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--terra);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    user-select: none;
+}
+
+.nav-avatar:hover {
+    background: var(--clay);
+    color: white;
+    transform: scale(1.08);
+}
+
+.nav-user {
+    position: relative;
+}
+
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    min-width: 160px;
+    padding: 6px;
+    z-index: 100;
+    animation: dropdown-in 0.15s ease;
+}
+
+.nav-avatar--active {
+    background: var(--clay);
+    color: white;
+}
+
+@keyframes dropdown-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text-mid);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+}
+
+.nav-dropdown-item:hover {
+    background: var(--cream);
+    color: var(--text-dark);
+}
+
+.nav-dropdown-item--danger {
+    color: var(--danger);
+}
+
+.nav-dropdown-item--danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.nav-dropdown-icon {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.nav-dropdown-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+}
+
+/* ============================================
+   PAGE LAYOUT WRAPPER
+   ============================================ */
+
+.page-main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px;
+}
