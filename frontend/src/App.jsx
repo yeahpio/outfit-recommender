@@ -8,8 +8,14 @@ import Recommendation from './pages/Recommendation';
 import Profile from './pages/Profile';
 
 function PrivateRoute({ children }) {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" />;
+  const { token, loading } = useAuth();
+
+  if (loading) {
+    return null;
+    // atau return <div>Loading...</div>;
+  }
+
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {

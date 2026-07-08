@@ -35,6 +35,8 @@ export default function Recommendation() {
       if (form.style) payload.style = form.style;
       if (form.warna_grup) payload.warna_grup = form.warna_grup;
       const res = await api.post('/recommendation/generate', payload);
+      console.log(res.data);
+      console.log(res.data.outfits[0]);
       setOutfits(res.data.outfits);
       setTotal(res.data.total_outfit);
     } catch (err) {
@@ -119,10 +121,16 @@ export default function Recommendation() {
               <div className="outfit-items-v2">
                 {/* Atasan */}
                 <div className="outfit-item-v2">
-                  <div className="item-img-lg" style={{ color: 'var(--terra)' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px' }}>
-                      <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.62 2V9a2 2 0 0 0 2 2h2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V11h2a2 2 0 0 0 2-2V5.42a2 2 0 0 0-1.62-2z"/>
-                    </svg>
+                  <div className="item-img-lg">
+                    <img
+                      src={o.atasan_image}
+                      alt={o.atasan}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
                   </div>
                   <div>
                     <div className="item-name-lg" title={o.atasan}>{o.atasan}</div>
@@ -139,11 +147,16 @@ export default function Recommendation() {
 
                 {/* Bawahan */}
                 <div className="outfit-item-v2">
-                  <div className="item-img-lg" style={{ color: 'var(--clay)' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px' }}>
-                      <path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
-                      <path d="M12 2v20M4 11h16"/>
-                    </svg>
+                  <div className="item-img-lg">
+                    <img
+                      src={o.bawahan_image}
+                      alt={o.bawahan}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
                   </div>
                   <div>
                     <div className="item-name-lg" title={o.bawahan}>{o.bawahan}</div>
@@ -160,10 +173,16 @@ export default function Recommendation() {
 
                 {/* Sepatu */}
                 <div className="outfit-item-v2">
-                  <div className="item-img-lg" style={{ color: 'var(--brown)' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px' }}>
-                      <path d="M3 12h18M3 12a9 9 0 0 1 18 0M3 12c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6"/>
-                    </svg>
+                  <div className="item-img-lg">
+                    <img
+                      src={o.sepatu_image}
+                      alt={o.sepatu}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
                   </div>
                   <div>
                     <div className="item-name-lg" title={o.sepatu}>{o.sepatu}</div>

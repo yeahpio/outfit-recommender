@@ -133,13 +133,35 @@ def generate_recommendation():
             valid_outfits.append(outfit)
 
     result = []
+
     for outfit in valid_outfits:
+        a = outfit['atasan']
+        b = outfit['bawahan']
+        s = outfit['sepatu']
+
+        def get_image(item):
+            if hasattr(item, 'image_url'):
+                image = item.image_url
+            else:
+                image = item.image_path
+
+            if image and not image.startswith(('http://', 'https://')):
+                image = request.host_url.rstrip('/') + '/' + image
+
+            return image
+
         result.append({
-            'atasan': outfit['atasan'].nama_pakaian,
-            'bawahan': outfit['bawahan'].nama_pakaian,
-            'sepatu': outfit['sepatu'].nama_pakaian
+            'atasan': a.nama_pakaian,
+            'atasan_image': get_image(a),
+
+            'bawahan': b.nama_pakaian,
+            'bawahan_image': get_image(b),
+
+            'sepatu': s.nama_pakaian,
+            'sepatu_image': get_image(s)
         })
 
+    print(result[0])
     return jsonify({
         'total_outfit': len(result),
         'outfits': result

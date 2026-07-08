@@ -54,13 +54,18 @@ def get_default_wardrobe():
     result = []
 
     for item in items:
+        image_url = item.image_url
+
+        if image_url and not image_url.startswith(('http://', 'https://')):
+            image_url = request.host_url.rstrip('/') + '/' + image_url
+
         result.append({
             'id_default': item.id_default,
             'nama_pakaian': item.nama_pakaian,
             'kategori': item.kategori,
             'style': item.style,
             'warna_grup': item.warna_grup,
-            'image_url': item.image_url
+            'image_url': image_url
         })
 
     return jsonify({
