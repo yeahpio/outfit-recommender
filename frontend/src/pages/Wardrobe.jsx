@@ -31,6 +31,8 @@ export default function Wardrobe() {
   const [categoryFilter, setCategoryFilter] = useState('semua');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [selectedImage, setSelectedImage] = useState(null);
+
   useEffect(() => {
     fetchDefault();
     fetchPersonal();
@@ -350,13 +352,19 @@ export default function Wardrobe() {
                   <div className="clothing-img">
                     {item.image_path || item.image_url ? (
                       <img
-                        src={item.image_path || item.image_url}
-                        alt={item.nama_pakaian}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
+                          src={item.image_path || item.image_url}
+                          alt={item.nama_pakaian}
+                          onClick={() => setSelectedImage(item.image_path || item.image_url)}
+                          style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              cursor: 'pointer'
+                          }}
+                          onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                          }}
                       />
                     ) : null}
                     <div
@@ -408,6 +416,19 @@ export default function Wardrobe() {
           )}
         </div>
       </div>
+      {selectedImage && (
+          <div
+              className="image-preview-overlay"
+              onClick={() => setSelectedImage(null)}
+          >
+              <img
+                  src={selectedImage}
+                  alt="Preview"
+                  className="image-preview"
+                  onClick={(e) => e.stopPropagation()}
+              />
+          </div>
+      )}
     </>
   );
 }

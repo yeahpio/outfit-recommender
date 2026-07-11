@@ -19,6 +19,7 @@ export default function Recommendation() {
   const [total, setTotal] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -125,10 +126,12 @@ export default function Recommendation() {
                     <img
                       src={o.atasan_image}
                       alt={o.atasan}
+                      onClick={() => setSelectedImage(o.atasan_image)}
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        cursor: 'pointer'
                       }}
                     />
                   </div>
@@ -151,10 +154,12 @@ export default function Recommendation() {
                     <img
                       src={o.bawahan_image}
                       alt={o.bawahan}
+                      onClick={() => setSelectedImage(o.bawahan_image)}
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        cursor: 'pointer'
                       }}
                     />
                   </div>
@@ -177,10 +182,12 @@ export default function Recommendation() {
                     <img
                       src={o.sepatu_image}
                       alt={o.sepatu}
+                      onClick={() => setSelectedImage(o.sepatu_image)}
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        cursor: 'pointer'
                       }}
                     />
                   </div>
@@ -204,6 +211,19 @@ export default function Recommendation() {
           </div>
         )}
       </div>
+      {selectedImage && (
+        <div
+          className="image-preview-overlay"
+          onClick={() => setSelectedImage(null)}
+        >
+          <img
+            src={selectedImage}
+            alt="Preview"
+            className="image-preview"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }

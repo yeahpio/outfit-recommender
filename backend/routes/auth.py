@@ -2,8 +2,19 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from extensions import db, bcrypt
 from models import User
+import os
+from uuid import uuid4
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 auth_bp = Blueprint('auth', __name__)
+
+def allowed_file(filename):
+    return (
+        '.' in filename and
+        filename.rsplit('.', 1)[1].lower()
+        in current_app.config['ALLOWED_EXTENSIONS']
+    )
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -70,7 +81,8 @@ def login():
         'user': {
             'id_user': user.id_user,
             'nama': user.nama,
-            'username': user.username
+            'username': user.username,
+            'profile_image': user.profile_image
         }
     }), 200
 
@@ -87,7 +99,8 @@ def me():
     return jsonify({
         'id_user': user.id_user,
         'nama': user.nama,
-        'username': user.username
+        'username': user.username,
+        'profile_image': user.profile_image
     }), 200
 
 @auth_bp.route('/me', methods=['PUT'])
@@ -129,7 +142,87 @@ def update_profile():
         'user': {
             'id_user': user.id_user,
             'nama': user.nama,
-            'username': user.username
+            'username': user.username,
+            'profile_image': user.profile_image
+        }
+    }), 200
+
+@auth_bp.route('/me/avatar', methods=['PUT'])
+@jwt_required()
+def update_avatar():
+
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'message': 'user tidak ditemukan'}), 404
+
+    if 'avatar' not in request.files:
+        return jsonify({'message': 'file tidak ditemukan'}), 400
+
+    file = request.files['avatar']
+
+    if file.filename == '':
+        return jsonify({'message': 'pilih file'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'message': 'format file tidak didukung'}), 400
+
+    filename = secure_filename(file.filename)
+    extension = filename.rsplit('.', 1)[1].lower()
+    filename = f'{uuid4().hex}.{extension}'
+
+    upload_folder = current_app.config['PROFILE_UPLOAD_FOLDER']
+
+    os.makedirs(upload_folder, exist_ok=True)
+
+    file.save(os.path.join(upload_folder, filename))
+
+    user.profile_image = f'/static/profile/{filename}'
+
+    db.session.commit()
+
+    return jsonify({
+        'message': 'foto profil berhasil diperbarui',
+        'user': {
+            'id_user': user.id_user,
+            'nama': user.nama,
+            'username': user.username,
+            'profile_image': user.profile_image
+        }
+    }), 200
+
+
+@auth_bp.route('/me/avatar', methods=['DELETE'])
+@jwt_required()
+def delete_avatar():
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'message': 'user tidak ditemukan'}), 404
+
+    if user.profile_image:
+        file_path = os.path.join(
+            current_app.root_path,
+            user.profile_image.lstrip("/")
+        )
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    user.profile_image = None
+    db.session.commit()
+
+    return jsonify({
+        "message": "foto profil berhasil dihapus",
+        "user": {
+            "id_user": user.id_user,
+            "nama": user.nama,
+            "username": user.username,
+            "profile_image": None
         }
     }), 200
 

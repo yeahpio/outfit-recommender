@@ -8,6 +8,8 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
+    profile_image = db.Column(db.Text, nullable=True)
+
     personal_wardrobe = db.relationship('PersonalWardrobe', backref='user', lazy=True, cascade='all, delete')
 
 class DefaultWardrobe(db.Model):
