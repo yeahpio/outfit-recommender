@@ -15,6 +15,21 @@ const COLOR_MAP = {
   cool: { hex: '#3B82F6', name: 'Cool (Blue/Green/Purple)' }
 };
 
+// Base URL for resolving relative image paths from the backend.
+// Adjust this if your API base URL is different (e.g. use an env var).
+const API_BASE_URL = api.defaults?.baseURL?.replace(/\/api\/?$/, '') || '';
+
+// Single source of truth for turning a stored image_path (or image_url)
+// into something an <img> tag can actually load, whether it's already
+// a full URL or just a relative path returned by the backend.
+function resolveImageUrl(path) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('//')) return `https:${path}`;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${API_BASE_URL}/${cleanPath}`;
+}
+
 export default function Wardrobe() {
   const [defaultItems, setDefaultItems] = useState([]);
   const [personalItems, setPersonalItems] = useState([]);
@@ -26,6 +41,7 @@ export default function Wardrobe() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [formImageError, setFormImageError] = useState(false);
 
   // Filtering states
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'default'
@@ -66,6 +82,7 @@ export default function Wardrobe() {
     if (!file) return;
 
     setSelectedFile(file);
+    setFormImageError(false);
 
     // Create local preview immediately
     if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -110,6 +127,7 @@ export default function Wardrobe() {
       setSelectedFile(null);
       if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
+      setFormImageError(false);
       setEditId(null);
       fetchPersonal();
       setTimeout(() => setSuccess(''), 3000);
@@ -124,8 +142,12 @@ export default function Wardrobe() {
       kategori: item.kategori,
       style: item.style,
       warna_grup: item.warna_grup,
-      image_path: item.image_path || '',
+      image_path: item.image_path || item.image_url || '',
     });
+    setSelectedFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    setFormImageError(false);
     setEditId(item.id_personal);
     // Scroll form into view
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -155,24 +177,26 @@ export default function Wardrobe() {
     if (kategori === 'atasan') {
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '32px', height: '32px' }}>
-          <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.62 2V9a2 2 0 0 0 2 2h2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V11h2a2 2 0 0 0 2-2V5.42a2 2 0 0 0-1.62-2z"/>
+          <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.62 2V9a2 2 0 0 0 2 2h2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V11h2a2 2 0 0 0 2-2V5.42a2 2 0 0 0-1.62-2z" />
         </svg>
       );
     } else if (kategori === 'bawahan') {
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '32px', height: '32px' }}>
-          <path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
-          <path d="M12 2v20M4 11h16"/>
+          <path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+          <path d="M12 2v20M4 11h16" />
         </svg>
       );
     } else {
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '32px', height: '32px' }}>
-          <path d="M3 12h18M3 12a9 9 0 0 1 18 0M3 12c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6"/>
+          <path d="M3 12h18M3 12a9 9 0 0 1 18 0M3 12c0-3.3 2.7-6 6-6h6c3.3 0 6 2.7 6 6" />
         </svg>
       );
     }
   }
+
+  const formImageSrc = imagePreview || (formImageError ? null : resolveImageUrl(form.image_path));
 
   return (
     <>
@@ -214,9 +238,9 @@ export default function Wardrobe() {
                     alignItems: "center"
                   }}
                 >
-                  {(imagePreview || form.image_path) ? (
+                  {formImageSrc ? (
                     <img
-                      src={imagePreview || `http://127.0.0.1:5000/${form.image_path}`}
+                      src={formImageSrc}
                       alt="preview"
                       style={{
                         width: "100%",
@@ -224,6 +248,7 @@ export default function Wardrobe() {
                         objectFit: "cover",
                         borderRadius: "8px"
                       }}
+                      onError={() => setFormImageError(true)}
                     />
                   ) : (
                     <>
@@ -284,7 +309,14 @@ export default function Wardrobe() {
 
             <div className="form-actions">
               {editId && (
-                <button type="button" className="btn-secondary" onClick={() => { setForm(emptyForm); setSelectedFile(null); if (imagePreview) URL.revokeObjectURL(imagePreview); setImagePreview(null); setEditId(null); }}>
+                <button type="button" className="btn-secondary" onClick={() => {
+                  setForm(emptyForm);
+                  setSelectedFile(null);
+                  if (imagePreview) URL.revokeObjectURL(imagePreview);
+                  setImagePreview(null);
+                  setFormImageError(false);
+                  setEditId(null);
+                }}>
                   Cancel
                 </button>
               )}
@@ -354,30 +386,31 @@ export default function Wardrobe() {
             filteredItems.map(item => {
               const id = item.id_personal || item.id_default;
               const colorInfo = COLOR_MAP[item.warna_grup] || { hex: '#ccc', name: item.warna_grup };
+              const itemImageSrc = resolveImageUrl(item.image_path || item.image_url);
 
               return (
                 <div className="clothing-card" key={id}>
                   <div className="clothing-img">
-                    {item.image_path || item.image_url ? (
+                    {itemImageSrc ? (
                       <img
-                          src={item.image_path || item.image_url}
-                          alt={item.nama_pakaian}
-                          onClick={() => setSelectedImage(item.image_path || item.image_url)}
-                          style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              cursor: 'pointer'
-                          }}
-                          onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                          }}
+                        src={itemImageSrc}
+                        alt={item.nama_pakaian}
+                        onClick={() => setSelectedImage(itemImageSrc)}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          cursor: 'pointer'
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
                     ) : null}
                     <div
                       style={{
-                        display: (item.image_path || item.image_url) ? 'none' : 'flex',
+                        display: itemImageSrc ? 'none' : 'flex',
                         width: '100%',
                         height: '100%',
                         alignItems: 'center',
@@ -425,17 +458,17 @@ export default function Wardrobe() {
         </div>
       </div>
       {selectedImage && (
-          <div
-              className="image-preview-overlay"
-              onClick={() => setSelectedImage(null)}
-          >
-              <img
-                  src={selectedImage}
-                  alt="Preview"
-                  className="image-preview"
-                  onClick={(e) => e.stopPropagation()}
-              />
-          </div>
+        <div
+          className="image-preview-overlay"
+          onClick={() => setSelectedImage(null)}
+        >
+          <img
+            src={selectedImage}
+            alt="Preview"
+            className="image-preview"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </>
   );
