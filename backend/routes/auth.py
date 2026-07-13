@@ -25,12 +25,12 @@ def register():
     password = data.get('password')
 
     if not nama or not username or not password:
-        return jsonify({'message': 'name, username, and password are required'}), 400
+        return jsonify({'message': 'Name, username, and password are required'}), 400
 
     existing_user = User.query.filter_by(username=username).first()
 
     if existing_user:
-        return jsonify({'message': 'username already taken'}), 400
+        return jsonify({'message': 'Username already taken'}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -44,7 +44,7 @@ def register():
     db.session.commit()
 
     return jsonify({
-        'message': 'registration successful',
+        'message': 'Registration successful',
         'user': {
             'id_user': new_user.id_user,
             'nama': new_user.nama,
@@ -61,22 +61,22 @@ def login():
     password = data.get('password')
 
     if not username or not password:
-        return jsonify({'message': 'username and password are required'}), 400
+        return jsonify({'message': 'Username and password are required'}), 400
 
     user = User.query.filter_by(username=username).first()
 
     if not user:
-        return jsonify({'message': 'invalid username or password'}), 401
+        return jsonify({'message': 'Invalid username or password'}), 401
 
     password_valid = bcrypt.check_password_hash(user.password, password)
 
     if not password_valid:
-        return jsonify({'message': 'username atau password salah'}), 401
+        return jsonify({'message': 'Invalid username or password'}), 401
 
     token = create_access_token(identity=str(user.id_user))
 
     return jsonify({
-        'message': 'login successful',
+        'message': 'Login successful',
         'token': token,
         'user': {
             'id_user': user.id_user,
@@ -94,7 +94,7 @@ def me():
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'message': 'user not found'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     return jsonify({
         'id_user': user.id_user,
@@ -116,10 +116,10 @@ def update_profile():
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'message': 'user tidak ditemukan'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     if not nama or not username:
-        return jsonify({'message': 'name and username are required'}), 400
+        return jsonify({'message': 'Name and username are required'}), 400
 
     existing_user = User.query.filter(
         User.username == username,
@@ -127,7 +127,7 @@ def update_profile():
     ).first()
 
     if existing_user:
-        return jsonify({'message': 'username sudah digunakan'}), 400
+        return jsonify({'message': 'Username already taken'}), 400
 
     user.nama = nama
     user.username = username
@@ -138,7 +138,7 @@ def update_profile():
     db.session.commit()
 
     return jsonify({
-        'message': 'profile updated successfully',
+        'message': 'Profile updated successfully',
         'user': {
             'id_user': user.id_user,
             'nama': user.nama,
@@ -156,18 +156,18 @@ def update_avatar():
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'message': 'user tidak ditemukan'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     if 'avatar' not in request.files:
-        return jsonify({'message': 'file not found'}), 400
+        return jsonify({'message': 'File not found'}), 400
 
     file = request.files['avatar']
 
     if file.filename == '':
-        return jsonify({'message': 'no file selected'}), 400
+        return jsonify({'message': 'No file selected'}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({'message': 'unsupported file format'}), 400
+        return jsonify({'message': 'Unsupported file format'}), 400
 
     filename = secure_filename(file.filename)
     extension = filename.rsplit('.', 1)[1].lower()
@@ -184,7 +184,7 @@ def update_avatar():
     db.session.commit()
 
     return jsonify({
-        'message': 'profile picture updated successfully',
+        'message': 'Profile picture updated successfully',
         'user': {
             'id_user': user.id_user,
             'nama': user.nama,
@@ -202,7 +202,7 @@ def delete_avatar():
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'message': 'user tidak ditemukan'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     if user.profile_image:
         file_path = os.path.join(
@@ -217,7 +217,7 @@ def delete_avatar():
     db.session.commit()
 
     return jsonify({
-        "message": "profile picture deleted successfully",
+        "message": "Profile picture deleted successfully",
         "user": {
             "id_user": user.id_user,
             "nama": user.nama,
@@ -234,9 +234,9 @@ def delete_account():
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'message': 'user tidak ditemukan'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     db.session.delete(user)
     db.session.commit()
 
-    return jsonify({'message': 'account deleted successfully'}), 200
+    return jsonify({'message': 'Account deleted successfully'}), 200
