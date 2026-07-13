@@ -24,6 +24,7 @@ export default function Wardrobe() {
   const [success, setSuccess] = useState('');
 
   const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   // Filtering states
@@ -65,6 +66,11 @@ export default function Wardrobe() {
     if (!file) return;
 
     setSelectedFile(file);
+
+    // Create local preview immediately
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(URL.createObjectURL(file));
+
     setUploading(true);
 
     try {
@@ -102,6 +108,8 @@ export default function Wardrobe() {
       }
       setForm(emptyForm);
       setSelectedFile(null);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
       setEditId(null);
       fetchPersonal();
       setTimeout(() => setSuccess(''), 3000);
@@ -206,9 +214,9 @@ export default function Wardrobe() {
                     alignItems: "center"
                   }}
                 >
-                  {form.image_path ? (
+                  {(imagePreview || form.image_path) ? (
                     <img
-                      src={`http://127.0.0.1:5000/${form.image_path}`}
+                      src={imagePreview || `http://127.0.0.1:5000/${form.image_path}`}
                       alt="preview"
                       style={{
                         width: "100%",
@@ -276,7 +284,7 @@ export default function Wardrobe() {
 
             <div className="form-actions">
               {editId && (
-                <button type="button" className="btn-secondary" onClick={() => { setForm(emptyForm); setEditId(null); }}>
+                <button type="button" className="btn-secondary" onClick={() => { setForm(emptyForm); setSelectedFile(null); if (imagePreview) URL.revokeObjectURL(imagePreview); setImagePreview(null); setEditId(null); }}>
                   Cancel
                 </button>
               )}

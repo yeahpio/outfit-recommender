@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 wardrobe_bp = Blueprint('wardrobe', __name__)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif'}
 
 def allowed_file(filename):
     return '.' in filename and \
