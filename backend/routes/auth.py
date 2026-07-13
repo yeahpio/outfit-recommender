@@ -111,7 +111,6 @@ def update_profile():
 
     nama = data.get('nama')
     username = data.get('username')
-    password = data.get('password')
 
     user = User.query.get(user_id)
 
@@ -132,9 +131,6 @@ def update_profile():
     user.nama = nama
     user.username = username
 
-    if password:
-        user.password = bcrypt.generate_password_hash(password).decode('utf-8')
-
     db.session.commit()
 
     return jsonify({
@@ -145,6 +141,31 @@ def update_profile():
             'username': user.username,
             'profile_image': user.profile_image
         }
+    }), 200
+
+@auth_bp.route('/me/password', methods=['PUT'])
+@jwt_required()
+def update_password():
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    data = request.get_json()
+
+    password = data.get('password')
+
+    if not password:
+        return jsonify({'message': 'Password is required'}), 400
+
+    user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Password updated successfully'
     }), 200
 
 @auth_bp.route('/me/avatar', methods=['PUT'])

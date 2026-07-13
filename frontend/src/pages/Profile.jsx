@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
 import '../styles/pages.css';
+import ConfirmModal from '../components/ConfirmModal';
 
-// --- small inline icons (no extra dependency needed) -----------------------
+// small inline icons 
 
 function EyeIcon() {
   return (
@@ -48,32 +49,6 @@ function Toast({ message, show, type }) {
   );
 }
 
-// --- Confirm modal -------------------------------------------------------
-
-function ConfirmModal({ open, title, description, confirmLabel, danger, loading, onConfirm, onCancel }) {
-  if (!open) return null;
-  return (
-    <div className="modal-overlay" onClick={onCancel}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-title">{title}</div>
-        <div className="modal-desc">{description}</div>
-        <div className="modal-actions">
-          <button className="btn-secondary" onClick={onCancel}>
-            Cancel
-          </button>
-          <button
-            className={danger ? 'btn-danger' : 'btn-primary'}
-            onClick={onConfirm}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // --- Main page -------------------------------------------------------------
 
 export default function Profile() {
@@ -87,7 +62,7 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState('');
 
   const [profileLoading, setProfileLoading] = useState(false);
-  const [passwordLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const [toastMsg, setToastMsg] = useState('');
   const [toastShow, setToastShow] = useState(false);
@@ -210,14 +185,38 @@ export default function Profile() {
   async function handleUpdatePassword(e) {
     e.preventDefault();
     setPasswordError('');
+    setPasswordLoading(true);
 
     if (!passwordForm.password) {
       setPasswordError('Enter a new password.');
+      setPasswordLoading(false);
       return;
     }
+
     if (passwordForm.password !== passwordForm.confirmPassword) {
       setPasswordError('Password confirmation does not match.');
+      setPasswordLoading(false);
       return;
+    }
+
+    try {
+      await api.put('/auth/me/password', {
+        password: passwordForm.password
+      });
+
+      setPasswordForm({
+        password: '',
+        confirmPassword: ''
+      });
+
+      setPasswordError('');
+
+      showToast('Password updated successfully');
+
+    } catch (err) {
+      setPasswordError(
+        err.response?.data?.message || 'Failed to update password.'
+      );
     }
   }
 

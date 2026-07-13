@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/pages.css';
 
 const KATEGORI = ['atasan', 'bawahan', 'sepatu'];
@@ -15,6 +16,20 @@ const COLOR_MAP = {
   cool: { hex: '#3B82F6', name: 'Cool (Blue/Green/Purple)' }
 };
 
+// Base URL for resolving relative image paths from the backend.
+const API_BASE_URL = api.defaults?.baseURL?.replace(/\/api\/?$/, '') || '';
+
+// Single source of truth for turning a stored image_path (or image_url)
+// into something an <img> tag can actually load, whether it's already
+// a full URL or just a relative path returned by the backend.
+function resolveImageUrl(path) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('//')) return `https:${path}`;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${API_BASE_URL}/${cleanPath}`;
+}
+
 export default function Wardrobe() {
   const [defaultItems, setDefaultItems] = useState([]);
   const [personalItems, setPersonalItems] = useState([]);
@@ -26,6 +41,7 @@ export default function Wardrobe() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [formImageError, setFormImageError] = useState(false);
 
   // Filtering states
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'default'
@@ -33,6 +49,10 @@ export default function Wardrobe() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // Delete confirmation modal state
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchDefault();
@@ -66,6 +86,7 @@ export default function Wardrobe() {
     if (!file) return;
 
     setSelectedFile(file);
+    setFormImageError(false);
 
     // Create local preview immediately
     if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -110,6 +131,7 @@ export default function Wardrobe() {
       setSelectedFile(null);
       if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
+      setFormImageError(false);
       setEditId(null);
       fetchPersonal();
       setTimeout(() => setSuccess(''), 3000);
@@ -124,20 +146,33 @@ export default function Wardrobe() {
       kategori: item.kategori,
       style: item.style,
       warna_grup: item.warna_grup,
-      image_path: item.image_path || '',
+      image_path: item.image_path || item.image_url || '',
     });
+    setSelectedFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    setFormImageError(false);
     setEditId(item.id_personal);
     // Scroll form into view
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Remove this item from your wardrobe?')) return;
+  function handleDelete(id) {
+    setDeleteTargetId(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTargetId) return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`/wardrobe/personal/${id}`);
+      await api.delete(`/wardrobe/personal/${deleteTargetId}`);
       fetchPersonal();
+      setDeleteTargetId(null);
     } catch (err) {
-      console.error('Failed to delete clothing:', err);
+      setError('Failed to delete clothing.');
+      setDeleteTargetId(null);
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -173,6 +208,8 @@ export default function Wardrobe() {
       );
     }
   }
+
+  const formImageSrc = imagePreview || (formImageError ? null : resolveImageUrl(form.image_path));
 
   return (
     <>
@@ -214,9 +251,9 @@ export default function Wardrobe() {
                     alignItems: "center"
                   }}
                 >
-                  {(imagePreview || form.image_path) ? (
+                  {formImageSrc ? (
                     <img
-                      src={imagePreview || `http://127.0.0.1:5000/${form.image_path}`}
+                      src={formImageSrc}
                       alt="preview"
                       style={{
                         width: "100%",
@@ -224,6 +261,7 @@ export default function Wardrobe() {
                         objectFit: "cover",
                         borderRadius: "8px"
                       }}
+                      onError={() => setFormImageError(true)}
                     />
                   ) : (
                     <>
@@ -284,7 +322,14 @@ export default function Wardrobe() {
 
             <div className="form-actions">
               {editId && (
-                <button type="button" className="btn-secondary" onClick={() => { setForm(emptyForm); setSelectedFile(null); if (imagePreview) URL.revokeObjectURL(imagePreview); setImagePreview(null); setEditId(null); }}>
+                <button type="button" className="btn-secondary" onClick={() => {
+                  setForm(emptyForm);
+                  setSelectedFile(null);
+                  if (imagePreview) URL.revokeObjectURL(imagePreview);
+                  setImagePreview(null);
+                  setFormImageError(false);
+                  setEditId(null);
+                }}>
                   Cancel
                 </button>
               )}
@@ -354,15 +399,16 @@ export default function Wardrobe() {
             filteredItems.map(item => {
               const id = item.id_personal || item.id_default;
               const colorInfo = COLOR_MAP[item.warna_grup] || { hex: '#ccc', name: item.warna_grup };
+              const itemImageSrc = resolveImageUrl(item.image_path || item.image_url);
 
               return (
                 <div className="clothing-card" key={id}>
                   <div className="clothing-img">
-                    {item.image_path || item.image_url ? (
+                    {itemImageSrc ? (
                       <img
-                          src={item.image_path || item.image_url}
+                          src={itemImageSrc}
                           alt={item.nama_pakaian}
-                          onClick={() => setSelectedImage(item.image_path || item.image_url)}
+                          onClick={() => setSelectedImage(itemImageSrc)}
                           style={{
                               width: '100%',
                               height: '100%',
@@ -377,7 +423,7 @@ export default function Wardrobe() {
                     ) : null}
                     <div
                       style={{
-                        display: (item.image_path || item.image_url) ? 'none' : 'flex',
+                        display: itemImageSrc ? 'none' : 'flex',
                         width: '100%',
                         height: '100%',
                         alignItems: 'center',
@@ -437,6 +483,17 @@ export default function Wardrobe() {
               />
           </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTargetId}
+        title="Remove this item?"
+        description="This clothing item will be removed from your wardrobe. This action cannot be undone."
+        confirmLabel="Remove"
+        danger
+        loading={deleteLoading}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </>
   );
 }
