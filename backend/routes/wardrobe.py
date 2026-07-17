@@ -18,11 +18,11 @@ def allowed_file(filename):
 @jwt_required()
 def upload_image():
     if 'image' not in request.files:
-        return jsonify({'message': 'Tidak ada file yang diunggah'}), 400
+        return jsonify({'message': 'No file uploaded'}), 400
     
     file = request.files['image']
     if file.filename == '':
-        return jsonify({'message': 'Nama file kosong'}), 400
+        return jsonify({'message': 'Filename is empty'}), 400
     
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -39,12 +39,12 @@ def upload_image():
         full_url = request.host_url.rstrip('/') + '/' + relative_path
         
         return jsonify({
-            'message': 'File berhasil diunggah',
+            'message': 'File uploaded successfully',
             'image_path': relative_path,
             'image_url': full_url
         }), 200
         
-    return jsonify({'message': 'Format file tidak didukung'}), 400
+    return jsonify({'message': 'File format not supported'}), 400
 
 
 @wardrobe_bp.route('/default', methods=['GET'])
@@ -69,7 +69,7 @@ def get_default_wardrobe():
         })
 
     return jsonify({
-        'message': 'data default wardrobe berhasil diambil',
+        'message': 'Default wardrobe data retrieved successfully',
         'data': result
     }), 200
 
@@ -98,7 +98,7 @@ def get_personal_wardrobe():
         })
 
     return jsonify({
-        'message': 'data personal wardrobe berhasil diambil',
+        'message': 'Personal wardrobe data retrieved successfully',
         'data': result
     }), 200
 
@@ -116,7 +116,7 @@ def add_personal_wardrobe():
 
     if not nama_pakaian or not kategori or not style or not warna_grup:
         return jsonify({
-            'message': 'nama pakaian, kategori, style, dan warna grup wajib diisi'
+            'message': 'Clothing name, category, style, and color group are required'
         }), 400
     
     valid_kategori = ['atasan', 'bawahan', 'sepatu']
@@ -124,13 +124,13 @@ def add_personal_wardrobe():
     valid_warna = ['neutral', 'warm', 'cool']
 
     if kategori not in valid_kategori:
-        return jsonify({'message': 'kategori tidak valid'}), 400
+        return jsonify({'message': 'Invalid category'}), 400
 
     if style not in valid_style:
-        return jsonify({'message': 'style tidak valid'}), 400
+        return jsonify({'message': 'Invalid style'}), 400
 
     if warna_grup not in valid_warna:
-        return jsonify({'message': 'warna grup tidak valid'}), 400
+        return jsonify({'message': 'Invalid color group'}), 400
 
     new_item = PersonalWardrobe(
         user_id=int(user_id),
@@ -149,7 +149,7 @@ def add_personal_wardrobe():
         resp_image_path = request.host_url + resp_image_path
 
     return jsonify({
-        'message': 'data personal wardrobe berhasil ditambahkan',
+        'message': 'Personal wardrobe data added successfully',
         'data': {
             'id_personal': new_item.id_personal,
             'user_id': new_item.user_id,
@@ -173,7 +173,7 @@ def update_personal_wardrobe(id_personal):
     ).first()
 
     if not item:
-        return jsonify({'message': 'data personal wardrobe tidak ditemukan'}), 404
+        return jsonify({'message': 'Personal wardrobe data not found'}), 404
 
     nama_pakaian = data.get('nama_pakaian')
     kategori = data.get('kategori')
@@ -183,7 +183,7 @@ def update_personal_wardrobe(id_personal):
 
     if not nama_pakaian or not kategori or not style or not warna_grup:
         return jsonify({
-            'message': 'nama pakaian, kategori, style, dan warna grup wajib diisi'
+            'message': 'Clothing name, category, style, and color group are required'
         }), 400
 
     valid_kategori = ['atasan', 'bawahan', 'sepatu']
@@ -191,13 +191,13 @@ def update_personal_wardrobe(id_personal):
     valid_warna = ['neutral', 'warm', 'cool']
 
     if kategori not in valid_kategori:
-        return jsonify({'message': 'kategori tidak valid'}), 400
+        return jsonify({'message': 'Invalid category'}), 400
 
     if style not in valid_style:
-        return jsonify({'message': 'style tidak valid'}), 400
+        return jsonify({'message': 'Invalid style'}), 400
 
     if warna_grup not in valid_warna:
-        return jsonify({'message': 'warna grup tidak valid'}), 400
+        return jsonify({'message': 'Invalid color group'}), 400
 
     item.nama_pakaian = nama_pakaian
     item.kategori = kategori
@@ -208,7 +208,7 @@ def update_personal_wardrobe(id_personal):
     db.session.commit()
 
     return jsonify({
-        'message': 'data personal wardrobe berhasil diperbarui'
+        'message': 'Personal wardrobe data updated successfully'
     }), 200
 
 @wardrobe_bp.route('/personal/<int:id_personal>', methods=['DELETE'])
@@ -223,7 +223,7 @@ def delete_personal_wardrobe(id_personal):
 
     if not item:
         return jsonify({
-            'message': 'data personal wardrobe tidak ditemukan'
+            'message': 'Personal wardrobe data not found'
         }), 404
 
     # Hapus file gambar jika ada
@@ -240,5 +240,5 @@ def delete_personal_wardrobe(id_personal):
     db.session.commit()
 
     return jsonify({
-        'message': 'data personal wardrobe berhasil dihapus'
+        'message': 'Personal wardrobe data deleted successfully'
     }), 200
