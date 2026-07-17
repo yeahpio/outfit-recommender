@@ -18,15 +18,15 @@ jwt.init_app(app)
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    return jsonify({'message': 'Token sudah expired, silakan login ulang'}), 401
+    return jsonify({'message': 'Access token has expired.'}), 401
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
-    return jsonify({'message': 'Token tidak valid'}), 401
+    return jsonify({'message': 'Invalid access token.'}), 401
 
 @jwt.unauthorized_loader
 def missing_token_callback(error):
-    return jsonify({'message': 'Token tidak ditemukan'}), 401
+    return jsonify({'message': 'Missing authorization token.'}), 401
 
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(wardrobe_bp, url_prefix='/api/wardrobe')
