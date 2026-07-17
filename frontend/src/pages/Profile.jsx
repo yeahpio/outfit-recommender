@@ -217,6 +217,8 @@ export default function Profile() {
       setPasswordError(
         err.response?.data?.message || 'Failed to update password.'
       );
+    } finally {
+        setPasswordLoading(false);
     }
   }
 
